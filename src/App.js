@@ -1,26 +1,95 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import { Switch, Route, Redirect, withRouter } from "react-router-dom";
+import Login from "./components/Login";
+import Home from "./components/Home";
+import Signup from "./components/Signup";
+import NotFound from "./components/NotFound";
+import Navbar from "./components/Navbar";
+import UpdateDetails from './components/UpdateDetails';
+class App extends Component {
+  state = {
+    users: [],
+    userError: ""
+  };
+  addUser = user => {
+    // console.log("user", user)
+    // const { cookies } = this.props;
+    // const users = [...cookies.get("users")];
+    // users.push(user);
+    // cookies.set("users", users);
+    //console.log(cookies.get("users"));
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    users.push({...user, id : users.length || 0});
+    localStorage.setItem("users", JSON.stringify(users));
+    this.props.history.replace("/login");
+  };
+  checkUser = user => {
+   
+    // const { cookies } = this.props;
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const u = users.filter(
+      us => us.email === user.email && us.password === user.password
+    );
+    if (u.length) {
+      console.log("User authenticated");
+      localStorage.setItem("user", JSON.stringify(u[0]));
+      // const { cookies } = this.props;
+      // cookies.set("user", u[0].email, { path: "/" });
+      // console.log(cookies.get("user"));
+      this.setState({ userError: "" });
+      this.props.history.push("/home");
+    } else {
+      this.setState({ userError: "The email or password is incorrect." }, ()=>{
+        setTimeout(()=>this.setState({userError : ""}), 5000)
+      });
+    }
+  };
+  setError = () => {
+    console.log("serdf")
+    this.setState({ userError: "" });
+  };
+  handleLog = () => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      localStorage.removeItem("user");
+    }
+    this.props.history.replace("/login");
+  };
+  // componentDidMount() {
+  //   const { cookies } = this.props;
+  //   cookies.set("users", []);
+  // }
+  render() {
+    return (
+      <>
+        <Navbar handleLog={this.handleLog} />
+        <div className="container my-3">
+          <Switch>
+            <Route
+              path="/login"
+              render={() => (
+                <Login
+                  checkUser={this.checkUser}
+                  userError={this.state.userError}
+                  setError={this.setError}
+                />
+              )}
+            />
+            <Route
+              path="/signup"
+              render={() => <Signup addUser={this.addUser} />}
+            />
+            <Route path="/home" component={Home} />
+            <Route path="/update-details" component={UpdateDetails} />
+            <Route path="/not-found" component={NotFound} />
+            <Redirect from="/" exact to="login" />
+            <Redirect to="/not-found" />
+          </Switch>
+        </div>
+      </>
+    );
+  }
 }
 
-export default App;
+export default withRouter(App);
