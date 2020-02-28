@@ -1,12 +1,12 @@
 import React, { Component } from "react";
-import { withRouter } from 'react-router-dom';
+import { withRouter } from "react-router-dom";
 
 class SignUp extends Component {
-	constructor(props){
-		super(props)
+	constructor(props) {
+		super(props);
 		const user = localStorage.getItem("user");
 		if (user) {
-			this.props.history.push("/home")
+			this.props.history.push("/home");
 		}
 		this.state = {
 			user: {
@@ -19,9 +19,9 @@ class SignUp extends Component {
 			errors: {},
 			confirmPassword: "",
 			passwordError: ""
-		}
+		};
 	}
-	
+
 	validateProperty = (name, value) => {
 		const { errors, user } = this.state;
 		// eslint-disable-next-line default-case
@@ -32,9 +32,7 @@ class SignUp extends Component {
 				user[name] = value;
 				const nameUser =
 					name === "firstName" ? "First Name" : "Last Name";
-				if (!value.trim()) {
-					errors[name] = `${nameUser} cannot be empty.`;
-				} else if (value.trim().length < 2) {
+				if (value.trim().length < 2) {
 					errors[
 						name
 					] = `${nameUser} must be at least 2 characters long.`;
@@ -49,6 +47,7 @@ class SignUp extends Component {
 			}
 
 			case "dob": {
+				user[name] = value;
 				const date = new Date();
 				const month = String(date.getMonth()).padStart(2, "0");
 				const day = String(date.getDate()).padStart(2, "0");
@@ -63,20 +62,23 @@ class SignUp extends Component {
 					errors["dob"] =
 						"Date of birth should be less than current date";
 				} else {
-					console.log("Inside else");
 					delete errors["dob"];
 				}
 				break;
 			}
 
 			case "email": {
+				user[name] = value;
 				// eslint-disable-next-line no-useless-escape
 				const regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-				if (!value.trim()) {
-					errors[name] = "Email can't be empty";
-				} else if (regex.test(value.trim())) {
-					user[name] = value;
-					delete errors[name];
+				if (regex.test(value.trim())) {
+					const users = JSON.parse(localStorage.getItem("users"));
+					const comp = users.filter(obj => obj.email === value);
+					if (comp.length) {
+						errors[name] = "Email already registered.";
+					} else {
+						delete errors[name];
+					}
 				} else {
 					errors[name] = "Please enter a valid email address.";
 				}
@@ -84,14 +86,11 @@ class SignUp extends Component {
 			}
 
 			case "password": {
+				user[name] = value;
 				// eslint-disable-next-line no-useless-escape
 				const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/;
-				if (!value.trim()) {
-					errors[name] = "Password can't be empty";
-				} else if (regex.test(value.trim())) {
-					user[name] = value;
+				if (regex.test(value.trim())) {
 					delete errors[name];
-					// this.setState({ errors, user });
 				} else {
 					errors[name] =
 						"Password must be at least 8 characters long and must contains 1 lowercase character, 1 uppercase character, 1 numeric character and 1 special character.";
@@ -100,20 +99,16 @@ class SignUp extends Component {
 			}
 
 			case "confirmPassword": {
+				let { passwordError, confirmPassword } = this.state;
 				if (!(user["password"] === value)) {
-					this.setState({
-						passwordError: "Passwords didn't match. Try again."
-					});
+					passwordError = "Passwords didn't match. Try again.";
 				} else if (!value.trim()) {
-					this.setState({
-						passwordError: "Confirm Password can't be empty."
-					});
+					passwordError = "Confirm Password can't be empty.";
 				} else {
-					this.setState({
-						passwordError: "",
-						confirmPassword: value
-					});
+					passwordError = "";
+					confirmPassword = value;
 				}
+				this.setState({ passwordError, confirmPassword });
 				break;
 			}
 		}
@@ -151,6 +146,7 @@ class SignUp extends Component {
 							type="text"
 							name="firstName"
 							id="firstName"
+							required
 							onChange={e =>
 								this.validateProperty(
 									e.target.name,
@@ -169,6 +165,7 @@ class SignUp extends Component {
 							type="text"
 							name="lastName"
 							id="lastName"
+							required
 							onChange={e =>
 								this.validateProperty(
 									e.target.name,
@@ -187,6 +184,7 @@ class SignUp extends Component {
 							type="date"
 							name="dob"
 							id="dob"
+							required
 							onChange={e =>
 								this.validateProperty(
 									e.target.name,
@@ -206,6 +204,7 @@ class SignUp extends Component {
 							type="email"
 							name="email"
 							id="email"
+							required
 							onChange={e =>
 								this.validateProperty(
 									e.target.name,
@@ -224,6 +223,7 @@ class SignUp extends Component {
 							type="password"
 							name="password"
 							id="password"
+							required
 							onChange={e =>
 								this.validateProperty(
 									e.target.name,
@@ -244,6 +244,7 @@ class SignUp extends Component {
 							type="password"
 							name="confirmPassword"
 							id="confirmPassword"
+							required
 							onChange={e =>
 								this.validateProperty(
 									e.target.name,
