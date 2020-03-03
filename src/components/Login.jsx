@@ -5,7 +5,7 @@ class Login extends Component {
 		super(props);
 		const user = localStorage.getItem("user");
 		if (user) {
-			this.props.history.push("/home")
+			this.props.history.push("/home");
 		}
 		this.state = {
 			user: { email: "", password: "" },

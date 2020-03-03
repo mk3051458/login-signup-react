@@ -49,15 +49,14 @@ class SignUp extends Component {
 			case "dob": {
 				user[name] = value;
 				const date = new Date();
-				const month = String(date.getMonth()).padStart(2, "0");
+				const month = String(date.getMonth() + 1).padStart(2, "0");
 				const day = String(date.getDate()).padStart(2, "0");
 				const year = String(date.getFullYear());
 				const dateValue = value.split("-");
 				if (
 					+dateValue[0] > +year ||
-					(+dateValue[0] > +year && +dateValue[1] > +month) ||
-					+dateValue[0] > +year ||
-					(+dateValue[1] > +month && +dateValue[2] > +day)
+					(+dateValue[0] === +year && +dateValue[1] > +month) ||
+					(+dateValue[0] === +year && +dateValue[1] === +month && +dateValue[2] > +day)
 				) {
 					errors["dob"] =
 						"Date of birth should be less than current date";
@@ -72,7 +71,7 @@ class SignUp extends Component {
 				// eslint-disable-next-line no-useless-escape
 				const regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 				if (regex.test(value.trim())) {
-					const users = JSON.parse(localStorage.getItem("users"));
+					const users = JSON.parse(localStorage.getItem("users")) || [];
 					const comp = users.filter(obj => obj.email === value);
 					if (comp.length) {
 						errors[name] = "Email already registered.";

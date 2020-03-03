@@ -54,15 +54,14 @@ class SignUp extends Component {
 
 			case "dob": {
 				const date = new Date();
-				const month = String(date.getMonth()).padStart(2, "0");
+				const month = String(date.getMonth() + 1).padStart(2, "0");
 				const day = String(date.getDate()).padStart(2, "0");
 				const year = String(date.getFullYear());
 				const dateValue = value.split("-");
 				if (
 					+dateValue[0] > +year ||
-					(+dateValue[0] > +year && +dateValue[1] > +month) ||
-					+dateValue[0] > +year ||
-					(+dateValue[1] > +month && +dateValue[2] > +day)
+					(+dateValue[0] === +year && +dateValue[1] > +month) ||
+					(+dateValue[0] === +year && +dateValue[1] === +month && +dateValue[2] > +day)
 				) {
 					errors["dob"] =
 						"Date of birth should be less than current date";
