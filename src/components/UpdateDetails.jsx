@@ -20,7 +20,9 @@ class SignUp extends Component {
 				lastName: "",
 				dob: "",
 				email: "",
-				password: ""
+				password: "",
+				phone : "",
+				gender : ""
 			},
 			errors: {},
 			confirmPassword: "",
@@ -30,7 +32,9 @@ class SignUp extends Component {
 
 	validateProperty = (name, value) => {
 		const { errors, user } = this.state;
-		if (name !== "confirmPassword") user[name] = value;
+		if ( (name !== "confirmPassword") && (name !== "phone") ) {
+			user[name] = value;
+		}
 		// eslint-disable-next-line default-case
 		switch (name) {
 			case "firstName":
@@ -38,7 +42,12 @@ class SignUp extends Component {
 				let regex = /^[a-z ,.'-]+$/i;
 				const nameUser =
 					name === "firstName" ? "First Name" : "Last Name";
-				if (value.trim().length < 2) {
+				if(value === ""){
+					errors[
+						name
+					] = `Please enter your ${nameUser}`;
+				}
+				else if (value.trim().length < 2) {
 					errors[
 						name
 					] = `${nameUser} must be at least 2 characters long.`;
@@ -49,6 +58,35 @@ class SignUp extends Component {
 						name
 					] = `${nameUser} contains alphanumeric charaters or ,.'- only`;
 				}
+				break;
+			}
+
+			case "gender" : {
+				user[name] = value;
+				if(value === ""){
+					errors["gender"] = "Please select your gender";
+				} else{
+					delete errors["gender"]
+				}
+				break;
+			}
+
+			case "phone" : {
+				if(value === ""){
+					errors["phone"] = "Please enter your contact number.";
+					user[name] = value;
+				} else{
+					const regex = /^[0-9]+$/g;
+					if(regex.test(value)){
+						user[name] = value;
+						if(value.length<8 || value.length > 16){
+							errors["phone"] = "Phone number length should be more than 7 characters and less than 17 characters.";
+						} else{
+							delete errors["phone"]
+						}
+					}
+					
+				} 
 				break;
 			}
 
@@ -66,7 +104,6 @@ class SignUp extends Component {
 					errors["dob"] =
 						"Date of birth should be less than current date";
 				} else {
-					console.log("Inside else");
 					delete errors["dob"];
 				}
 				break;
@@ -188,11 +225,57 @@ class SignUp extends Component {
 						</small>
 					</div>
 					<div className="form-group">
+						<label htmlFor="phone">Phone Number</label>
+						<input
+							type="tel"
+							name="phone"
+							id="phone"
+							required
+							value={this.state.user.phone}
+							onChange={e =>
+								this.validateProperty(
+									e.target.name,
+									e.target.value
+								)
+							}
+							className="form-control"
+						/>
+						<small className="text-sm text-danger">
+							{this.state.errors["phone"]}
+						</small>
+					</div>
+					<div className="form-group">
+						<label htmlFor="gender">Gender</label>
+						<select
+							name="gender"
+							id="gender"
+							value={this.state.user.gender}
+							className="form-control"
+							onChange={e =>
+								this.validateProperty(
+									e.target.name,
+									e.target.value
+								)
+							}
+							required
+						>
+							<option></option>
+							<option value="male">Male</option>
+							<option value="female">Female</option>
+							<option value="others">Others</option>
+						</select>
+						<small className="text-sm text-danger">
+							{this.state.errors["gender"]}
+						</small>
+					</div>
+					<div className="form-group">
 						<label htmlFor="dob">Date Of Birth</label>
 						<input
 							type="date"
 							name="dob"
 							id="dob"
+							max="2002-12-31"
+							min="1920-01-01"
 							required
 							value={user.dob}
 							onChange={e =>
